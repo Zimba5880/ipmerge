@@ -30,7 +30,9 @@ export class ipset{
 
         let target_flex = Math.floor(ips.prefix/8);
         target_flex = target_flex==4?3:target_flex;
-
+        if(this.prefix>ips.prefix){
+            _res=false;
+        }
         if(flexiableindex<=target_flex){
             for(let i=0;i<flexiableindex;i++){
                 if(this.start[i]<ips.start[i]){
@@ -49,18 +51,21 @@ export class ipset{
     sliceIPs(ips:ipset):Array<ipset> {
         const _res:Array<ipset> = [];
         if(this.contains(ips)){
-            const sliced = halfSliceIPs(ips);
-            for(let i=0;i<sliced.length;i++){
-                if(sliced[i]!=null&&sliced[i].contains(ips)){
-                    const removed = this.sliceIPs(sliced[i]);
-                    for(let j=0;j<removed.length;j++){
-                        _res.push(removed[j]);
-                    }
+            const sliced = halfSliceIPs(this);
+            if(sliced[0]!=null&&sliced[0].contains(ips)){
+                _res.push(sliced[1]);
+                // const removed = this.sliceIPs(sliced[0]);
+                const removed = sliced[0].sliceIPs(ips);
+                for(let j=0;j<removed.length;j++){
+                    _res.push(removed[j]);
                 }
-                else{
-                    if(sliced[i]!=null){
-                        _res.push(sliced[i]);
-                    }
+            }
+            else if(sliced[1]!=null&&sliced[1].contains(ips)){
+                _res.push(sliced[0]);
+                // const removed = this.sliceIPs(sliced[1]);
+                const removed = sliced[1].sliceIPs(ips);
+                for(let j=0;j<removed.length;j++){
+                    _res.push(removed[j]);
                 }
             }
         }

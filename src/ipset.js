@@ -24,6 +24,9 @@ var ipset = /** @class */ (function () {
         flexiableindex = flexiableindex == 4 ? 3 : flexiableindex;
         var target_flex = Math.floor(ips.prefix / 8);
         target_flex = target_flex == 4 ? 3 : target_flex;
+        if (this.prefix > ips.prefix) {
+            _res = false;
+        }
         if (flexiableindex <= target_flex) {
             for (var i = 0; i < flexiableindex; i++) {
                 if (this.start[i] < ips.start[i]) {
@@ -40,18 +43,21 @@ var ipset = /** @class */ (function () {
     ipset.prototype.sliceIPs = function (ips) {
         var _res = [];
         if (this.contains(ips)) {
-            var sliced = halfSliceIPs(ips);
-            for (var i = 0; i < sliced.length; i++) {
-                if (sliced[i] != null && sliced[i].contains(ips)) {
-                    var removed = this.sliceIPs(sliced[i]);
-                    for (var j = 0; j < removed.length; j++) {
-                        _res.push(removed[j]);
-                    }
+            var sliced = halfSliceIPs(this);
+            if (sliced[0] != null && sliced[0].contains(ips)) {
+                _res.push(sliced[1]);
+                // const removed = this.sliceIPs(sliced[0]);
+                var removed = sliced[0].sliceIPs(ips);
+                for (var j = 0; j < removed.length; j++) {
+                    _res.push(removed[j]);
                 }
-                else {
-                    if (sliced[i] != null) {
-                        _res.push(sliced[i]);
-                    }
+            }
+            else if (sliced[1] != null && sliced[1].contains(ips)) {
+                _res.push(sliced[0]);
+                // const removed = this.sliceIPs(sliced[1]);
+                var removed = sliced[1].sliceIPs(ips);
+                for (var j = 0; j < removed.length; j++) {
+                    _res.push(removed[j]);
                 }
             }
         }
