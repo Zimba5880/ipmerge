@@ -159,7 +159,7 @@ function qualifyIp(iparr:Array<number>,index:number):Array<number>{
 
 function halfSliceIPs(ips:ipset):Array<ipset>{
     const newprefix = ips.prefix+1;
-    if(newprefix==32){
+    if(ips.prefix==32){
         return [ips,null];
     }
     else{
